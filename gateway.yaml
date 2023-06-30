@@ -1,0 +1,24 @@
+kind: Gateway
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: gcp-test-internal
+  namespace: gcp-test
+spec:
+  gatewayClassName: gke-l7-rilb
+  listeners:
+  - name: https
+    protocol: HTTPS
+    port: 443
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: selfsigned-cert-secret
+    allowedRoutes:
+      kinds:
+      - kind: HTTPRoute
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      kinds:
+      - kind: HTTPRoute
