@@ -1,0 +1,48 @@
+{{- $version := $.Values.version }}
+{{- range $.Values.services }}
+  {{- $name := (eq . 0) | ternary (printf "store-v%d" $version) (printf "store-v%d-%d" $version .) }}
+  {{- $hostname := printf "%s.example.com" $name }}
+---
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: {{ $name | quote }}
+  namespace: gcp-test
+spec:
+  parentRefs:
+  - name: gcp-test-internal
+  hostnames:
+  - {{ $hostname | quote }}
+  rules:
+  - matches:
+    - path:
+        value: /
+    backendRefs:
+    - name: {{ $name | quote }}
+      port: 8080
+---
+{{ if eq (mod $version 2) 0 }}
+# simulate second route entry, if hostnames exceeds limit of 15 entries
+{{- $altHostname := printf "dummy.%s.example.com" $name }}
+{{- $altName := printf "%s-dummy" $name }}
+---
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: {{ $altName | quote }}
+  namespace: gcp-test
+spec:
+  parentRefs:
+  - name: gcp-test-internal
+  hostnames:
+  - {{ $altHostname | quote }}
+  rules:
+  - matches:
+    - path:
+        value: /
+    backendRefs:
+    - name: {{ $name | quote }}
+      port: 8080
+---
+{{ end }}
+{{ end }}

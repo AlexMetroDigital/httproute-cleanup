@@ -1,4 +1,6 @@
-kubectl delete deployment store-v2 --namespace gcp-test
-kubectl delete service store-v2 --namespace gcp-test
-kubectl delete httproute store-v2 --namespace gcp-test
-kubectl delete healthcheckpolicy store-v2 --namespace gcp-test
+VERSIONS=($(seq 1 1 50))
+
+for version in "${VERSIONS[@]}"
+do
+  helm uninstall "stores-v${version}" &
+done

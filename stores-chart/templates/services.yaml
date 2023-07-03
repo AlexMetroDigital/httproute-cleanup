@@ -1,0 +1,34 @@
+{{- $version := printf "v%d" $.Values.version }}
+{{- range $.Values.services }}
+  {{- $name := (eq . 0) | ternary (printf "store-%s" $version) (printf "store-%s-%d" $version .) }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name | quote }}
+  namespace: gcp-test
+spec:
+  type: ClusterIP
+  selector:
+    app: store
+    version: {{ $version }}
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ $name | quote }}
+  namespace: gcp-test
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        requestPath: "/.well-known/ready"
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ $name | quote }}
+{{- end }}

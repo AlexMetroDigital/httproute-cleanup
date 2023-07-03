@@ -11,7 +11,7 @@ subjectAltName            = @sans_list
 
 [dn_requirements]
 0.organizationName        = example
-commonName                = store1.example.com, store2.example.com
+commonName                = *.example.com
 
 [sans_list]
-DNS.1                     = store1.example.com, store2.example.com
+DNS.1                     = *.example.com

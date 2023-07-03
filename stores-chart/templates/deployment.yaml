@@ -1,0 +1,28 @@
+{{- $version := printf "v%d" $.Values.version }}
+{{- $name := printf "store-%s" $version }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name | quote }}
+  namespace: gcp-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store
+      version:  {{ $version }}
+  template:
+    metadata:
+      labels:
+        app: store
+        version: {{ $version }}
+    spec:
+      containers:
+      - name: whereami
+        image: us-docker.pkg.dev/google-samples/containers/gke/whereami:v1.2.20
+        ports:
+        - containerPort: 8080
+        env:
+        - name: METADATA
+          value: {{ $name | quote }}
